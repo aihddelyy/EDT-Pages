@@ -20222,14 +20222,32 @@ proxy.example.com:8443#HK"
 			const el = document.getElementById('proxyIPCustom');
 			const checkbox = document.getElementById('enableCustomProxyIP');
 			if (!el) return;
+			const value = el.value;
+			const enabled = !!(checkbox && checkbox.checked);
+			// 关键：同步到 currentConfig，避免后续 saveConfigToServer 擦掉这两个字段
+			if (!currentConfig.反代) currentConfig.反代 = {};
+			currentConfig.反代.PROXYIP_CUSTOM = value;
+			currentConfig.反代.PROXYIP_CUSTOM_ENABLED = enabled;
+			// 兜底：如果 textarea 为空但 config.json 里有值，从 config.json 拉回（防止误清空）
+			if (!value.trim() && (!currentConfig.反代.PROXYIP_CUSTOM || !currentConfig.反代.PROXYIP_CUSTOM.trim())) {
+				try {
+					const resp = await fetch('/admin/config.json?_t=' + Date.now());
+					if (resp.ok) {
+						const cfg = await resp.json();
+						if (cfg && cfg.反代 && typeof cfg.反代.PROXYIP_CUSTOM === 'string' && cfg.反代.PROXYIP_CUSTOM.trim()) {
+							const preservedValue = cfg.反代.PROXYIP_CUSTOM;
+							el.value = preservedValue;
+							currentConfig.反代.PROXYIP_CUSTOM = preservedValue;
+							return; // 不写空值
+						}
+					}
+				} catch (e) { /* 失败继续走原流程 */ }
+			}
 			try {
 				await fetch('/admin/saveProxyipCustom', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						value: el.value,
-						enabled: !!(checkbox && checkbox.checked)
-					})
+					body: JSON.stringify({ value, enabled })
 				});
 			} catch (e) { console.error('保存个性化PROXYIP失败:', e); }
 		}
