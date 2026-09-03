@@ -10718,19 +10718,15 @@
 					</div>
 
 					<div id="proxyIPCustomSection" class="form-group">
-						<div class="form-group">
-							<label for="proxyIPCustom">个性化 PROXYIP（按节点名/IP/域名匹配关键词）</label>
-							<div class="input-wrapper">
-								<textarea id="proxyIPCustom" rows="5"
-									title="个性化 PROXYIP"
-									placeholder="格式：proxyip#关键词，多项以换行或逗号分隔
+						<label for="proxyIPCustom">个性化 PROXYIP（按节点名/IP/域名匹配关键词）</label>
+						<textarea id="proxyIPCustom" rows="5"
+							title="个性化 PROXYIP"
+							placeholder="格式：proxyip#关键词，多项以换行或逗号分隔
 示例：
 1.2.3.4:443#HK
 5.6.7.8:443#SG,9.10.11.12:443#JP
 proxy.example.com:8443#HK"
-									onchange="processProxyIPCustom()" oninput="processProxyIPCustom()"></textarea>
-							</div>
-						</div>
+							onchange="processProxyIPCustom()" oninput="processProxyIPCustom()"></textarea>
 					</div>
 
 
@@ -20118,6 +20114,8 @@ proxy.example.com:8443#HK"
 			const isProxyIPMode = mode === 'auto';
 			document.getElementById('proxyIPSection').style.display = isProxyIPMode ? 'block' : 'none';
 			document.getElementById('otherProxySection').style.display = isProxyIPMode ? 'none' : 'block';
+			const customSection = document.getElementById('proxyIPCustomSection');
+			if (customSection) customSection.style.display = isProxyIPMode ? 'block' : 'none';
 
 			if (!isProxyIPMode) {
 				setProxyModeSelection(mode);
@@ -20172,11 +20170,20 @@ proxy.example.com:8443#HK"
 		}
 
 		async function loadProxyIPCustom() {
+			const section = document.getElementById('proxyIPCustomSection');
+			const el = document.getElementById('proxyIPCustom');
+			if (!el) return;
+			// 仅在 PROXYIP 模式下加载并显示
+			const mode = getEffectiveProxyMode ? getEffectiveProxyMode() : 'auto';
+			if (mode !== 'auto') {
+				if (section) section.style.display = 'none';
+				return;
+			}
+			if (section) section.style.display = 'block';
 			try {
 				const resp = await fetch('/admin/getProxyipCustom?_t=' + Date.now());
 				const json = await resp.json();
-				const el = document.getElementById('proxyIPCustom');
-				if (el) el.value = (json && json.value) || '';
+				el.value = (json && json.value) || '';
 			} catch (e) { console.error('加载个性化PROXYIP失败:', e); }
 		}
 		function processProxyIPCustom() { markModified('proxy'); }
