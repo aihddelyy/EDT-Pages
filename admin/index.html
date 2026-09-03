@@ -10717,6 +10717,22 @@
 						</div>
 					</div>
 
+					<div id="proxyIPCustomSection" class="form-group">
+						<div class="form-group">
+							<label for="proxyIPCustom">个性化 PROXYIP（按节点名/IP/域名匹配关键词）</label>
+							<div class="input-wrapper">
+								<textarea id="proxyIPCustom" rows="5"
+									title="个性化 PROXYIP"
+									placeholder="格式：proxyip#关键词，多项以换行或逗号分隔
+示例：
+1.2.3.4:443#HK
+5.6.7.8:443#SG,9.10.11.12:443#JP
+proxy.example.com:8443#HK"
+									onchange="processProxyIPCustom()" oninput="processProxyIPCustom()"></textarea>
+							</div>
+						</div>
+					</div>
+
 
 					<div id="otherProxySection" class="hidden-section">
 						<div class="form-group">
@@ -18967,6 +18983,7 @@
 				originalConfig = JSON.parse(JSON.stringify(currentConfig));
 				renderUI();
 				loadVersionByUUID(currentConfig.UUID);
+				if (typeof loadProxyIPCustom === 'function') loadProxyIPCustom();
 				// 设置网页标题
 				document.title = `${currentConfig.优选订阅生成?.SUBNAME || 'edgetunnel'} 设置页面 - 管理后台`;
 			} catch (error) {
@@ -20154,6 +20171,27 @@
 			}
 		}
 
+		async function loadProxyIPCustom() {
+			try {
+				const resp = await fetch('/admin/getProxyipCustom?_t=' + Date.now());
+				const json = await resp.json();
+				const el = document.getElementById('proxyIPCustom');
+				if (el) el.value = (json && json.value) || '';
+			} catch (e) { console.error('加载个性化PROXYIP失败:', e); }
+		}
+		function processProxyIPCustom() { markModified('proxy'); }
+		async function saveProxyIPCustom() {
+			const el = document.getElementById('proxyIPCustom');
+			if (!el) return;
+			try {
+				await fetch('/admin/saveProxyipCustom', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ value: el.value })
+				});
+			} catch (e) { console.error('保存个性化PROXYIP失败:', e); }
+		}
+
 		function toggleAutoProxy() {
 			const autoProxy = document.getElementById('autoProxy').checked;
 			document.getElementById('proxyIP').disabled = autoProxy;
@@ -20760,6 +20798,7 @@
 				}
 			};
 
+			if (typeof saveProxyIPCustom === 'function') await saveProxyIPCustom();
 			await saveConfigToServer('proxy');
 		}
 
