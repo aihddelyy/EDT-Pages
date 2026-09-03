@@ -9209,10 +9209,6 @@
 			background: #1f2937;
 		}
 
-		.line-editor.proxyip-custom-editor {
-			min-height: 120px;
-		}
-
 		.line-editor .gutter {
 			position: relative;
 			overflow: hidden;
@@ -10727,22 +10723,22 @@
 									<label for="autoProxy" class="checkbox-label"
 										title="启用自动获取: 使用默认内置的PROXYIP">启用自动获取</label>
 								</div>
+								<div class="checkbox-group">
+									<input type="checkbox" id="proxyIPCustomEnabled"
+										title="启用个性化PROXYIP: 根据节点备注中的#标签匹配，为节点赋予对应的PROXYIP"
+										onchange="toggleProxyIPCustom(); markModified('proxy')">
+									<label for="proxyIPCustomEnabled" class="checkbox-label"
+										title="启用个性化PROXYIP: 根据节点备注中的#标签匹配，为节点赋予对应的PROXYIP">启用个性化PROXYIP</label>
+								</div>
 							</div>
 						</div>
-						<div class="form-group">
+						<div id="proxyIPCustomSection" class="form-group hidden-section">
 							<div class="label-with-hint">
 								<label for="proxyIPCustomList">个性化PROXYIP</label>
 								<button type="button" class="inline-hint-btn" title="查看个性化PROXYIP填写说明"
 									onclick="showProxyIPCustomHelp()" aria-label="查看个性化PROXYIP填写说明">!</button>
 							</div>
-							<div class="checkbox-group">
-								<input type="checkbox" id="proxyIPCustomEnabled"
-									title="启用个性化PROXYIP: 根据节点备注中的#标签匹配，为节点赋予对应的PROXYIP"
-									onchange="toggleProxyIPCustom(); markModified('proxy')">
-								<label for="proxyIPCustomEnabled" class="checkbox-label"
-									title="启用个性化PROXYIP: 根据节点备注中的#标签匹配，为节点赋予对应的PROXYIP">启用个性化PROXYIP</label>
-							</div>
-							<div class="line-editor line-editor-wrap proxyip-custom-editor" id="proxyIPCustomEditor">
+							<div class="line-editor line-editor-wrap" id="proxyIPCustomEditor">
 								<div class="gutter" aria-hidden="true">
 									<pre>1</pre>
 								</div>
@@ -20254,12 +20250,15 @@ proxyip3.cmliussss.net:8443#US
 
 		function toggleProxyIPCustom() {
 			const enabledEl = document.getElementById('proxyIPCustomEnabled');
+			const sectionEl = document.getElementById('proxyIPCustomSection');
 			const listEl = document.getElementById('proxyIPCustomList');
 			const editorEl = document.getElementById('proxyIPCustomEditor');
-			if (!enabledEl || !listEl || !editorEl) return;
+			if (!enabledEl || !sectionEl || !listEl || !editorEl) return;
 			const enabled = enabledEl.checked;
+			sectionEl.classList.toggle('hidden-section', !enabled);
 			listEl.disabled = !enabled;
 			editorEl.classList.toggle('line-editor-disabled', !enabled);
+			if (enabled && listEl._refreshLineEditor) requestAnimationFrame(() => listEl._refreshLineEditor());
 		}
 
 		function showProxyIPCustomHelp() {
