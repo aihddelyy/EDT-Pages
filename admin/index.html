@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -9199,6 +9199,20 @@
 			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 		}
 
+		.line-editor.line-editor-disabled {
+			opacity: 0.55;
+			pointer-events: none;
+			background: #f3f4f6;
+		}
+
+		html.dark-mode .line-editor.line-editor-disabled {
+			background: #1f2937;
+		}
+
+		.line-editor.proxyip-custom-editor {
+			min-height: 120px;
+		}
+
 		.line-editor .gutter {
 			position: relative;
 			overflow: hidden;
@@ -10713,34 +10727,34 @@
 									<label for="autoProxy" class="checkbox-label"
 										title="启用自动获取: 使用默认内置的PROXYIP">启用自动获取</label>
 								</div>
-								<div class="checkbox-group">
-									<input type="checkbox" id="enableCustomProxyIP" title="启用个性化 PROXYIP"
-										onchange="toggleCustomProxyIP(); markModified('proxy')">
-									<label for="enableCustomProxyIP" class="checkbox-label"
-										title="启用个性化 PROXYIP">启用个性化 PROXYIP</label>
-								</div>
 							</div>
 						</div>
-					</div>
-
-					<div id="proxyIPCustomSection" class="form-group">
-						<label for="proxyIPCustom">个性化 PROXYIP（按节点名/IP/域名匹配关键词）</label>
-						<div class="line-editor line-editor-wrap" id="proxyIPCustomEditor">
-							<div class="gutter" aria-hidden="true">
-								<pre>1</pre>
+						<div class="form-group">
+							<div class="label-with-hint">
+								<label for="proxyIPCustomList">个性化PROXYIP</label>
+								<button type="button" class="inline-hint-btn" title="查看个性化PROXYIP填写说明"
+									onclick="showProxyIPCustomHelp()" aria-label="查看个性化PROXYIP填写说明">!</button>
 							</div>
-							<div class="editor-area">
-								<div class="line-shades" aria-hidden="true">
-									<div class="shade-line"></div>
+							<div class="checkbox-group">
+								<input type="checkbox" id="proxyIPCustomEnabled"
+									title="启用个性化PROXYIP: 根据节点备注中的#标签匹配，为节点赋予对应的PROXYIP"
+									onchange="toggleProxyIPCustom(); markModified('proxy')">
+								<label for="proxyIPCustomEnabled" class="checkbox-label"
+									title="启用个性化PROXYIP: 根据节点备注中的#标签匹配，为节点赋予对应的PROXYIP">启用个性化PROXYIP</label>
+							</div>
+							<div class="line-editor line-editor-wrap proxyip-custom-editor" id="proxyIPCustomEditor">
+								<div class="gutter" aria-hidden="true">
+									<pre>1</pre>
 								</div>
-								<textarea id="proxyIPCustom" rows="5" wrap="soft"
-									title="个性化 PROXYIP"
-									placeholder="格式：proxyip#关键词，多项以换行或逗号分隔
-示例：
-1.2.3.4:443#HK
-5.6.7.8:443#SG,9.10.11.12:443#JP
-proxy.example.com:8443#HK"
-									onchange="processProxyIPCustom()" oninput="processProxyIPCustom()"></textarea>
+								<div class="editor-area">
+									<div class="line-shades" aria-hidden="true">
+										<div class="shade-line"></div>
+									</div>
+									<textarea id="proxyIPCustomList" title="个性化PROXYIP地址"
+										wrap="soft"
+										placeholder="proxyip1.cmliussss.net#HK&#10;proxyip2.cmliussss.net#JP&#10;proxyip3.cmliussss.net:443#US"
+										onchange="markModified('proxy')"></textarea>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -16726,6 +16740,45 @@ proxy.example.com:8443#HK"
 						</div>
 					</div>
 				</div>
+
+				<!-- 个性化PROXYIP 填写说明 -->
+				<div id="authTokenProxyIPCustomSection" style="display: none;">
+					<div class="auth-help-summary auth-help-summary-warning">
+						<strong>提示：</strong>一行写一条，格式为 <b>PROXYIP#标签</b>。PROXYIP 端口不写默认 <b>443</b>。标签需与订阅内节点备注中的标签相同才可匹配。
+					</div>
+
+					<div class="auth-help-section-title" style="margin-top: 20px;">📚 个性化PROXYIP 案例</div>
+					<div class="auth-example-list">
+						<div class="auth-example-item">
+							<h4>单行格式</h4>
+							<pre>proxyip1.cmliussss.net#HK
+proxyip2.cmliussss.net#JP
+proxyip3.cmliussss.net:8443#US
+[2606:4700::]:2053#IPv6</pre>
+						</div>
+						<div class="auth-example-item">
+							<h4>分隔符</h4>
+							<pre>proxyip1.cmliussss.net#HK,proxyip2.cmliussss.net#JP</pre>
+						</div>
+					</div>
+
+					<div class="auth-help-section-title" style="margin-top: 20px;">⚙️ 匹配规则</div>
+					<div class="auth-help-card">
+						<span class="card-tag tag-auto">匹配方式</span>
+						<h4>🏷️ 节点备注匹配</h4>
+						<p>系统会按顺序遍历填入的 <b>PROXYIP#标签</b> 列表，检查节点备注（如 <code>HK-01#HK</code>、<code>东京#JP</code>、<code>洛杉矶-1#US</code> 等）中是否包含对应的标签（如 <b>#HK</b>、<b>#JP</b>、<b>#US</b>）。包含则将该节点的 PROXYIP 替换为对应值。</p>
+					</div>
+
+					<div class="auth-help-card">
+						<span class="card-tag tag-manual">优先级</span>
+						<h4>📌 优先级说明</h4>
+						<p>个性化 PROXYIP 仅在 <b>启用个性化PROXYIP</b> 勾选时生效。<b>未启用</b> 时，即使填写了内容，也不会修改任何节点的 PROXYIP。</p>
+					</div>
+
+					<div class="auth-help-tip">
+						<strong>⚠️ 重要提示：</strong>个性化 PROXYIP 与 全局 PROXYIP 共存时，节点将优先使用个性化 PROXYIP；填写后请确保 节点备注 中存在对应标签，否则不会匹配。
+					</div>
+				</div>
 			</div>
 			<button type="button" class="btn btn-primary btn-close-modal" onclick="closeAuthTokenHelpModal()"
 				style="margin-top: 20px;">关闭</button>
@@ -17926,6 +17979,17 @@ proxy.example.com:8443#HK"
 				populateProxyProtocolFromConfig(getSelectedProxyProtocol());
 			}
 
+			const proxyIPCustomListEl = document.getElementById('proxyIPCustomList');
+			if (proxyIPCustomListEl) {
+				proxyIPCustomListEl.value = currentConfig.反代?.PROXYIP_CUSTOM || '';
+				if (proxyIPCustomListEl._refreshLineEditor) requestAnimationFrame(() => proxyIPCustomListEl._refreshLineEditor());
+			}
+			const proxyIPCustomEnabledEl = document.getElementById('proxyIPCustomEnabled');
+			if (proxyIPCustomEnabledEl) {
+				proxyIPCustomEnabledEl.checked = !!currentConfig.反代?.PROXYIP_CUSTOM_ENABLED;
+			}
+			toggleProxyIPCustom();
+
 			updateProxyMode(false, false);
 		}
 
@@ -18995,7 +19059,6 @@ proxy.example.com:8443#HK"
 				originalConfig = JSON.parse(JSON.stringify(currentConfig));
 				renderUI();
 				loadVersionByUUID(currentConfig.UUID);
-				if (typeof loadProxyIPCustom === 'function') loadProxyIPCustom();
 				// 设置网页标题
 				document.title = `${currentConfig.优选订阅生成?.SUBNAME || 'edgetunnel'} 设置页面 - 管理后台`;
 			} catch (error) {
@@ -20130,11 +20193,6 @@ proxy.example.com:8443#HK"
 			const isProxyIPMode = mode === 'auto';
 			document.getElementById('proxyIPSection').style.display = isProxyIPMode ? 'block' : 'none';
 			document.getElementById('otherProxySection').style.display = isProxyIPMode ? 'none' : 'block';
-			const customSection = document.getElementById('proxyIPCustomSection');
-			const customCheckbox = document.getElementById('enableCustomProxyIP');
-			if (customSection && customCheckbox) {
-				customSection.style.display = (isProxyIPMode && customCheckbox.checked) ? 'block' : 'none';
-			}
 
 			if (!isProxyIPMode) {
 				setProxyModeSelection(mode);
@@ -20188,95 +20246,24 @@ proxy.example.com:8443#HK"
 			}
 		}
 
-		async function loadProxyIPCustom() {
-			const section = document.getElementById('proxyIPCustomSection');
-			const el = document.getElementById('proxyIPCustom');
-			const checkbox = document.getElementById('enableCustomProxyIP');
-			if (!el) return;
-			// 仅在 PROXYIP 模式下加载
-			const mode = getEffectiveProxyMode ? getEffectiveProxyMode() : 'auto';
-			if (mode !== 'auto') {
-				if (section) section.style.display = 'none';
-				if (checkbox) checkbox.checked = false;
-				return;
-			}
-			try {
-				const resp = await fetch('/admin/getProxyipCustom?_t=' + Date.now());
-				const json = await resp.json();
-				const value = (json && json.value) || '';
-				const enabled = !!(json && json.enabled);
-				el.value = value;
-				const hasValue = value.trim().length > 0;
-				// checkbox：启用且有值 → 勾选；否则不勾选
-				if (checkbox) checkbox.checked = enabled && hasValue;
-				// 显示：checkbox 勾选才显示
-				if (section) section.style.display = checkbox && checkbox.checked ? 'block' : 'none';
-				// 刷新行号与灰白间隔
-				if (checkbox && checkbox.checked && typeof refreshLineEditor === 'function') {
-					refreshLineEditor(el);
-				}
-			} catch (e) { console.error('加载个性化PROXYIP失败:', e); }
-		}
-		function processProxyIPCustom() { markModified('proxy'); }
-		async function saveProxyIPCustom() {
-			const el = document.getElementById('proxyIPCustom');
-			const checkbox = document.getElementById('enableCustomProxyIP');
-			if (!el) return;
-			const value = el.value;
-			const enabled = !!(checkbox && checkbox.checked);
-			// 关键：同步到 currentConfig，避免后续 saveConfigToServer 擦掉这两个字段
-			if (!currentConfig.反代) currentConfig.反代 = {};
-			currentConfig.反代.PROXYIP_CUSTOM = value;
-			currentConfig.反代.PROXYIP_CUSTOM_ENABLED = enabled;
-			// 兜底：如果 textarea 为空但 config.json 里有值，从 config.json 拉回（防止误清空）
-			if (!value.trim() && (!currentConfig.反代.PROXYIP_CUSTOM || !currentConfig.反代.PROXYIP_CUSTOM.trim())) {
-				try {
-					const resp = await fetch('/admin/config.json?_t=' + Date.now());
-					if (resp.ok) {
-						const cfg = await resp.json();
-						if (cfg && cfg.反代 && typeof cfg.反代.PROXYIP_CUSTOM === 'string' && cfg.反代.PROXYIP_CUSTOM.trim()) {
-							const preservedValue = cfg.反代.PROXYIP_CUSTOM;
-							el.value = preservedValue;
-							currentConfig.反代.PROXYIP_CUSTOM = preservedValue;
-							return; // 不写空值
-						}
-					}
-				} catch (e) { /* 失败继续走原流程 */ }
-			}
-			try {
-				await fetch('/admin/saveProxyipCustom', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ value, enabled })
-				});
-			} catch (e) { console.error('保存个性化PROXYIP失败:', e); }
-		}
-
 		function toggleAutoProxy() {
 			const autoProxy = document.getElementById('autoProxy').checked;
 			document.getElementById('proxyIP').disabled = autoProxy;
 			markModified('proxy');
 		}
 
-		async function toggleCustomProxyIP() {
-			const checkbox = document.getElementById('enableCustomProxyIP');
-			const section = document.getElementById('proxyIPCustomSection');
-			const el = document.getElementById('proxyIPCustom');
-			const enabled = checkbox && checkbox.checked;
-			if (section) section.style.display = enabled ? 'block' : 'none';
-			// 勾选时：若 textarea 为空，从 KV 拉一次
-			if (enabled && el && !el.value.trim()) {
-				try {
-					const resp = await fetch('/admin/getProxyipCustom?_t=' + Date.now());
-					const json = await resp.json();
-					el.value = (json && json.value) || '';
-				} catch (e) { console.error('读取个性化PROXYIP失败:', e); }
-			}
-			// 刷新行号与灰白间隔
-			if (enabled && el && typeof refreshLineEditor === 'function') {
-				refreshLineEditor(el);
-			}
-			markModified('proxy');
+		function toggleProxyIPCustom() {
+			const enabledEl = document.getElementById('proxyIPCustomEnabled');
+			const listEl = document.getElementById('proxyIPCustomList');
+			const editorEl = document.getElementById('proxyIPCustomEditor');
+			if (!enabledEl || !listEl || !editorEl) return;
+			const enabled = enabledEl.checked;
+			listEl.disabled = !enabled;
+			editorEl.classList.toggle('line-editor-disabled', !enabled);
+		}
+
+		function showProxyIPCustomHelp() {
+			showAuthTokenHelpModal('proxyIPCustom');
 		}
 
 		function clearHeightTransition(content) {
@@ -20867,9 +20854,13 @@ proxy.example.com:8443#HK"
 
 			const existingReverseProxyConfig = currentConfig.反代 || {};
 			const existingSocks5Config = existingReverseProxyConfig.SOCKS5 || {};
+			const proxyIPCustomEnabledEl = document.getElementById('proxyIPCustomEnabled');
+			const proxyIPCustomListEl = document.getElementById('proxyIPCustomList');
 			currentConfig.反代 = {
 				...existingReverseProxyConfig,
 				PROXYIP: proxyIP,
+				PROXYIP_CUSTOM_ENABLED: proxyIPCustomEnabledEl ? !!proxyIPCustomEnabledEl.checked : false,
+				PROXYIP_CUSTOM: proxyIPCustomListEl ? (proxyIPCustomListEl.value || '') : (existingReverseProxyConfig.PROXYIP_CUSTOM || ''),
 				SOCKS5: {
 					...existingSocks5Config,
 					启用: socksEnabled,
@@ -20879,7 +20870,6 @@ proxy.example.com:8443#HK"
 				}
 			};
 
-			if (typeof saveProxyIPCustom === 'function') await saveProxyIPCustom();
 			await saveConfigToServer('proxy');
 		}
 
@@ -23801,26 +23791,30 @@ proxy.example.com:8443#HK"
 		}
 
 		function showAuthTokenHelpModal(mode) {
-			const displayMode = mode === 'uuid' ? 'uuid' : mode === 'customIPs' ? 'customIPs' : 'token';
+			const displayMode = mode === 'uuid' ? 'uuid' : mode === 'customIPs' ? 'customIPs' : mode === 'proxyIPCustom' ? 'proxyIPCustom' : 'token';
 			const modal = document.getElementById('authTokenHelpModal');
 			const tokenSection = document.getElementById('authTokenTokenSection');
 			const uuidSection = document.getElementById('authTokenUUIDSection');
 			const customIPsSection = document.getElementById('authTokenCustomIPsSection');
+			const proxyIPCustomSection = document.getElementById('authTokenProxyIPCustomSection');
 			const titleEl = document.getElementById('authTokenHelpTitle');
 
-			if (!modal || !tokenSection || !uuidSection || !customIPsSection) return;
+			if (!modal || !tokenSection || !uuidSection || !customIPsSection || !proxyIPCustomSection) return;
 
 			modal.dataset.mode = displayMode;
 
 			tokenSection.style.display = displayMode === 'token' ? 'block' : 'none';
 			uuidSection.style.display = displayMode === 'uuid' ? 'block' : 'none';
 			customIPsSection.style.display = displayMode === 'customIPs' ? 'block' : 'none';
+			proxyIPCustomSection.style.display = displayMode === 'proxyIPCustom' ? 'block' : 'none';
 
 			if (titleEl) {
 				if (displayMode === 'uuid') {
 					titleEl.textContent = '🔑 如何修改 UUID？';
 				} else if (displayMode === 'customIPs') {
 					titleEl.textContent = '📍 自定义优选 填写说明';
+				} else if (displayMode === 'proxyIPCustom') {
+					titleEl.textContent = '🎯 个性化PROXYIP 填写说明';
 				} else {
 					titleEl.textContent = '🎫 如何修改订阅 TOKEN？';
 				}
@@ -25481,7 +25475,7 @@ proxy.example.com:8443#HK"
 			loadConfig();
 			initUserMode();
 			initLineEditor('customIPs');
-			initLineEditor('proxyIPCustom');
+			initLineEditor('proxyIPCustomList');
 			initNodeUUIDEasterEgg();
 			initVersionCopyEasterEgg();
 			// 独立预加载 SubConfig 数据，不阻塞主流程
