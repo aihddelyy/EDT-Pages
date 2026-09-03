@@ -10713,20 +10713,36 @@
 									<label for="autoProxy" class="checkbox-label"
 										title="启用自动获取: 使用默认内置的PROXYIP">启用自动获取</label>
 								</div>
+								<div class="checkbox-group">
+									<input type="checkbox" id="enableCustomProxyIP" title="启用个性化 PROXYIP"
+										onchange="toggleCustomProxyIP(); markModified('proxy')">
+									<label for="enableCustomProxyIP" class="checkbox-label"
+										title="启用个性化 PROXYIP">启用个性化 PROXYIP</label>
+								</div>
 							</div>
 						</div>
 					</div>
 
 					<div id="proxyIPCustomSection" class="form-group">
 						<label for="proxyIPCustom">个性化 PROXYIP（按节点名/IP/域名匹配关键词）</label>
-						<textarea id="proxyIPCustom" rows="5"
-							title="个性化 PROXYIP"
-							placeholder="格式：proxyip#关键词，多项以换行或逗号分隔
+						<div class="line-editor line-editor-wrap" id="proxyIPCustomEditor">
+							<div class="gutter" aria-hidden="true">
+								<pre>1</pre>
+							</div>
+							<div class="editor-area">
+								<div class="line-shades" aria-hidden="true">
+									<div class="shade-line"></div>
+								</div>
+								<textarea id="proxyIPCustom" rows="5" wrap="soft"
+									title="个性化 PROXYIP"
+									placeholder="格式：proxyip#关键词，多项以换行或逗号分隔
 示例：
 1.2.3.4:443#HK
 5.6.7.8:443#SG,9.10.11.12:443#JP
 proxy.example.com:8443#HK"
-							onchange="processProxyIPCustom()" oninput="processProxyIPCustom()"></textarea>
+									onchange="processProxyIPCustom()" oninput="processProxyIPCustom()"></textarea>
+							</div>
+						</div>
 					</div>
 
 
@@ -20115,7 +20131,10 @@ proxy.example.com:8443#HK"
 			document.getElementById('proxyIPSection').style.display = isProxyIPMode ? 'block' : 'none';
 			document.getElementById('otherProxySection').style.display = isProxyIPMode ? 'none' : 'block';
 			const customSection = document.getElementById('proxyIPCustomSection');
-			if (customSection) customSection.style.display = isProxyIPMode ? 'block' : 'none';
+			const customCheckbox = document.getElementById('enableCustomProxyIP');
+			if (customSection && customCheckbox) {
+				customSection.style.display = (isProxyIPMode && customCheckbox.checked) ? 'block' : 'none';
+			}
 
 			if (!isProxyIPMode) {
 				setProxyModeSelection(mode);
@@ -20172,29 +20191,41 @@ proxy.example.com:8443#HK"
 		async function loadProxyIPCustom() {
 			const section = document.getElementById('proxyIPCustomSection');
 			const el = document.getElementById('proxyIPCustom');
+			const checkbox = document.getElementById('enableCustomProxyIP');
 			if (!el) return;
-			// 仅在 PROXYIP 模式下加载并显示
+			// 仅在 PROXYIP 模式下加载
 			const mode = getEffectiveProxyMode ? getEffectiveProxyMode() : 'auto';
 			if (mode !== 'auto') {
 				if (section) section.style.display = 'none';
+				if (checkbox) checkbox.checked = false;
 				return;
 			}
-			if (section) section.style.display = 'block';
 			try {
 				const resp = await fetch('/admin/getProxyipCustom?_t=' + Date.now());
 				const json = await resp.json();
-				el.value = (json && json.value) || '';
+				const value = (json && json.value) || '';
+				const enabled = !!(json && json.enabled);
+				el.value = value;
+				const hasValue = value.trim().length > 0;
+				// checkbox：启用且有值 → 勾选；否则不勾选
+				if (checkbox) checkbox.checked = enabled && hasValue;
+				// 显示：checkbox 勾选才显示
+				if (section) section.style.display = checkbox && checkbox.checked ? 'block' : 'none';
 			} catch (e) { console.error('加载个性化PROXYIP失败:', e); }
 		}
 		function processProxyIPCustom() { markModified('proxy'); }
 		async function saveProxyIPCustom() {
 			const el = document.getElementById('proxyIPCustom');
+			const checkbox = document.getElementById('enableCustomProxyIP');
 			if (!el) return;
 			try {
 				await fetch('/admin/saveProxyipCustom', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ value: el.value })
+					body: JSON.stringify({
+						value: el.value,
+						enabled: !!(checkbox && checkbox.checked)
+					})
 				});
 			} catch (e) { console.error('保存个性化PROXYIP失败:', e); }
 		}
@@ -20202,6 +20233,23 @@ proxy.example.com:8443#HK"
 		function toggleAutoProxy() {
 			const autoProxy = document.getElementById('autoProxy').checked;
 			document.getElementById('proxyIP').disabled = autoProxy;
+			markModified('proxy');
+		}
+
+		async function toggleCustomProxyIP() {
+			const checkbox = document.getElementById('enableCustomProxyIP');
+			const section = document.getElementById('proxyIPCustomSection');
+			const el = document.getElementById('proxyIPCustom');
+			const enabled = checkbox && checkbox.checked;
+			if (section) section.style.display = enabled ? 'block' : 'none';
+			// 勾选时：若 textarea 为空，从 KV 拉一次
+			if (enabled && el && !el.value.trim()) {
+				try {
+					const resp = await fetch('/admin/getProxyipCustom?_t=' + Date.now());
+					const json = await resp.json();
+					el.value = (json && json.value) || '';
+				} catch (e) { console.error('读取个性化PROXYIP失败:', e); }
+			}
 			markModified('proxy');
 		}
 
