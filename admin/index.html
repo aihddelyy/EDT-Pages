@@ -20260,7 +20260,14 @@ proxyip3.cmliussss.net:8443#US
 			const editorEl = document.getElementById('proxyIPCustomEditor');
 			if (!enabledEl || !sectionEl || !listEl || !editorEl) return;
 			const enabled = enabledEl.checked;
-			sectionEl.classList.toggle('hidden-section', !enabled);
+			// 完全隐藏外层 section（带 !important 兜底，避免被更高优先级规则覆盖）
+			if (enabled) {
+				sectionEl.style.removeProperty('display');
+				sectionEl.classList.remove('hidden-section');
+			} else {
+				sectionEl.classList.add('hidden-section');
+				sectionEl.style.setProperty('display', 'none', 'important');
+			}
 			listEl.disabled = !enabled;
 			editorEl.classList.toggle('line-editor-disabled', !enabled);
 			if (enabled) {
