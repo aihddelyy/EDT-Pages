@@ -20211,6 +20211,10 @@ proxy.example.com:8443#HK"
 				if (checkbox) checkbox.checked = enabled && hasValue;
 				// 显示：checkbox 勾选才显示
 				if (section) section.style.display = checkbox && checkbox.checked ? 'block' : 'none';
+				// 刷新行号与灰白间隔
+				if (checkbox && checkbox.checked && typeof refreshLineEditor === 'function') {
+					refreshLineEditor(el);
+				}
 			} catch (e) { console.error('加载个性化PROXYIP失败:', e); }
 		}
 		function processProxyIPCustom() { markModified('proxy'); }
@@ -20249,6 +20253,10 @@ proxy.example.com:8443#HK"
 					const json = await resp.json();
 					el.value = (json && json.value) || '';
 				} catch (e) { console.error('读取个性化PROXYIP失败:', e); }
+			}
+			// 刷新行号与灰白间隔
+			if (enabled && el && typeof refreshLineEditor === 'function') {
+				refreshLineEditor(el);
 			}
 			markModified('proxy');
 		}
@@ -25455,6 +25463,7 @@ proxy.example.com:8443#HK"
 			loadConfig();
 			initUserMode();
 			initLineEditor('customIPs');
+			initLineEditor('proxyIPCustom');
 			initNodeUUIDEasterEgg();
 			initVersionCopyEasterEgg();
 			// 独立预加载 SubConfig 数据，不阻塞主流程
