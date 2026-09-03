@@ -20258,7 +20258,11 @@ proxyip3.cmliussss.net:8443#US
 			sectionEl.classList.toggle('hidden-section', !enabled);
 			listEl.disabled = !enabled;
 			editorEl.classList.toggle('line-editor-disabled', !enabled);
-			if (enabled && listEl._refreshLineEditor) requestAnimationFrame(() => listEl._refreshLineEditor());
+			if (enabled) {
+				requestAnimationFrame(() => {
+					if (typeof listEl._refreshLineEditor === 'function') listEl._refreshLineEditor();
+				});
+			}
 		}
 
 		function showProxyIPCustomHelp() {
@@ -21070,7 +21074,11 @@ proxyip3.cmliussss.net:8443#US
 					body: JSON.stringify(currentConfig)
 				});
 
-				if (!response.ok) throw new Error('保存失败');
+				if (!response.ok) {
+					let errMsg = '保存失败';
+					try { const errBody = await response.json(); if (errBody && errBody.error) errMsg = errBody.error; } catch (_) {}
+					throw new Error('HTTP ' + response.status + ': ' + errMsg);
+				}
 				showToast('✅ 配置已保存，请更新订阅，才能获取最新节点内容！', 'success');
 				modifiedSections.delete(section);
 				updateButtonStates();
