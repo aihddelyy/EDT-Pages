@@ -10909,7 +10909,7 @@
 										data-lpignore="true"
 										data-1p-ignore="true"
 										data-form-type="other"
-										placeholder="proxyip1.cmliussss.net#HK&#10;proxyip2.cmliussss.net#JP&#10;proxyip3.cmliussss.net:443#US"
+										placeholder="proxyip1.cmliussss.net#HK|香港|HK01&#10;proxyip2.cmliussss.net#JP|东京&#10;proxyip3.cmliussss.net:443#US|洛杉矶&#10;proxyip4.cmliussss.net#SG,proxyip5.cmliussss.net#KR"
 										onchange="markModified('proxy')"></textarea>
 								</div>
 							</div>
@@ -16950,21 +16950,31 @@
 				<!-- 个性化PROXYIP 填写说明 -->
 				<div id="authTokenProxyIPCustomSection" style="display: none;">
 					<div class="auth-help-summary auth-help-summary-warning">
-						<strong>提示：</strong>一行写一条，格式为 <b>PROXYIP#标签</b>。PROXYIP 端口不写默认 <b>443</b>。标签需与订阅内节点备注中的标签相同才可匹配。
+							<strong>提示：</strong>一行写一条，格式为 <b>PROXYIP#标签</b>。PROXYIP 端口不写默认 <b>443</b>。<b>#</b> 后用 <code>|</code> 分隔多个关键词，任一关键词出现在节点备注中即匹配。
 					</div>
 
 					<div class="auth-help-section-title" style="margin-top: 20px;">📚 个性化PROXYIP 案例</div>
 					<div class="auth-example-list">
 						<div class="auth-example-item">
-							<h4>单行格式</h4>
+							<h4>单关键词格式</h4>
 							<pre>proxyip1.cmliussss.net#HK
 proxyip2.cmliussss.net#JP
 proxyip3.cmliussss.net:8443#US
 [2606:4700::]:2053#IPv6</pre>
 						</div>
 						<div class="auth-example-item">
-							<h4>分隔符</h4>
-							<pre>proxyip1.cmliussss.net#HK,proxyip2.cmliussss.net#JP</pre>
+							<h4>多关键词格式（竖线分隔，任一命中即匹配）</h4>
+							<pre>proxyip1.cmliussss.net#HK|香港|HK01
+proxyip2.cmliussss.net#JP|东京
+proxyip3.cmliussss.net:443#US|洛杉矶</pre>
+						</div>
+						<div class="auth-example-item">
+							<h4>多条目格式（换行 / 逗号分隔）</h4>
+							<pre>proxyip1.cmliussss.net#HK
+proxyip2.cmliussss.net#JP
+proxyip3.cmliussss.net#US
+或（同一行用逗号拼接）：
+proxyip1.cmliussss.net#HK,proxyip2.cmliussss.net#JP,proxyip3.cmliussss.net#US</pre>
 						</div>
 					</div>
 
@@ -16973,6 +16983,7 @@ proxyip3.cmliussss.net:8443#US
 						<span class="card-tag tag-auto">匹配方式</span>
 						<h4>🏷️ 节点备注匹配</h4>
 						<p>系统会按顺序遍历填入的 <b>PROXYIP#标签</b> 列表，检查节点备注（如 <code>HK-01#HK</code>、<code>东京#JP</code>、<code>洛杉矶-1#US</code> 等）中是否包含对应的标签（如 <b>#HK</b>、<b>#JP</b>、<b>#US</b>）。包含则将该节点的 PROXYIP 替换为对应值。</p>
+						<p style="margin-top: 10px;"><b>多关键词</b>：<code>#</code> 后用 <b>竖线</b> <code>|</code> 分隔多个关键词，<b>任一关键词</b> 出现在节点备注中即命中。例如 <code>proxyip.host#HK|香港|HK01</code> 对节点备注 <code>HK-01</code>、<code>香港01</code>、<code>HK01-test</code> 均会匹配。</p>
 					</div>
 
 					<div class="auth-help-card">
