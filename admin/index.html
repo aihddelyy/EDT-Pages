@@ -6048,7 +6048,7 @@
 			opacity: 1;
 		}
 
-		.simple-mode .advanced-module {
+		.simple-mode .advanced-module:not(.mode-always-visible) {
 			overflow: hidden;
 			opacity: 0;
 			max-height: 0;
@@ -6597,8 +6597,8 @@
 
 		/* ==================== 开始优选 - 方式选择弹窗 ==================== */
 		.optimize-start-modal {
-			max-width: 720px;
-			width: min(95vw, 720px);
+			max-width: 900px;
+			width: min(95vw, 900px);
 			padding: 34px 30px 30px;
 			text-align: center;
 		}
@@ -6618,7 +6618,7 @@
 
 		.optimize-start-cards {
 			display: grid;
-			grid-template-columns: 1fr 1fr;
+			grid-template-columns: 1fr 1fr 1fr;
 			gap: 16px;
 		}
 
@@ -6667,6 +6667,11 @@
 			white-space: nowrap;
 		}
 
+		/* 「稳定」徽章：橘黄色系，呼应 Cloudflare 品牌色 */
+		.optimize-card-badge-orange {
+			background: linear-gradient(135deg, #fbad41 0, #f6821f 100%);
+		}
+
 		.optimize-card-online:hover {
 			border-color: #10b981;
 			background: linear-gradient(180deg, #ecfdf5 0, #f8fafc 100%);
@@ -6675,6 +6680,12 @@
 		.optimize-card-local:hover {
 			border-color: #6366f1;
 			background: linear-gradient(180deg, #eef2ff 0, #f8fafc 100%);
+		}
+
+		/* 在线优选域名卡片：悬停天蓝色提示可跳转 */
+		.optimize-card-domain:hover {
+			border-color: #0ea5e9;
+			background: linear-gradient(180deg, #f0f9ff 0, #f8fafc 100%);
 		}
 
 		.optimize-card-icon {
@@ -6740,6 +6751,11 @@
 		html.dark-mode .optimize-card-local:hover {
 			border-color: #6366f1;
 			background: rgba(99, 102, 241, .16);
+		}
+
+		html.dark-mode .optimize-card-domain:hover {
+			border-color: #0ea5e9;
+			background: rgba(14, 165, 233, .16);
 		}
 
 		html.dark-mode .optimize-card-desc {
@@ -10559,7 +10575,7 @@
 			</div>
 
 			<!-- 模块3: 详细配置信息 -->
-			<div class="module collapsed advanced-module">
+			<div class="module collapsed advanced-module mode-always-visible">
 				<div class="module-title" onclick="toggleModule(this)">
 					⚙️ 详细配置信息
 					<svg class="collapse-icon" viewBox="0 0 24 24">
@@ -10621,8 +10637,8 @@
 						<div class="form-group mobile-half" id="transportGroup" style="display: none;">
 							<label>传输协议</label>
 							<select id="transport" title="传输协议" onchange="handleTransportChange()">
-								<option value="ws">WebSocket 快！</option>
-								<option value="xhttp">XHTTP 更新到2.1.20260811144522版本之后就稳了！</option>
+								<option value="ws">WebSocket 速度快！(适合大多数场景)</option>
+								<option value="xhttp">XHTTP 长连接不断流！(适合AI长思考、单线程下载)</option>
 								<option value="grpc">gRPC 花里胡笑！</option>
 							</select>
 						</div>
@@ -10750,7 +10766,7 @@
 			</div>
 
 			<!-- 模块3.5: ECH 设置(实验性质) -->
-			<div class="module collapsed advanced-module" id="echModule" style="display: none;">
+			<div class="module collapsed advanced-module mode-always-visible" id="echModule" style="display: none;">
 				<div class="module-title" onclick="toggleModule(this)">
 					🔐 Encrypted Client Hello
 					<svg class="collapse-icon" viewBox="0 0 24 24">
@@ -11595,14 +11611,21 @@
 			<div class="optimize-start-cards">
 				<button type="button" class="optimize-start-card optimize-card-online" onclick="chooseOnlineOptimize()">
 					<span class="optimize-card-icon">🌐</span>
-					<span class="optimize-card-title">在线优选<span class="optimize-card-badge">推荐</span></span>
+					<span class="optimize-card-title">在线优选IP<span class="optimize-card-badge">推荐</span></span>
 					<span class="optimize-card-desc">通过浏览器实时进行在线优选，兼容性高，有浏览器就能进行</span>
 					<span class="optimize-card-tag tag-pro">✅ 优点：无需安装，即开即用</span>
 					<span class="optimize-card-tag tag-con">⚠️ 缺点：易受运营商阻断，阻断时无法使用</span>
 				</button>
+				<button type="button" class="optimize-start-card optimize-card-domain" onclick="chooseOnlineDomainOptimize()">
+					<span class="optimize-card-icon">🛰️</span>
+					<span class="optimize-card-title">在线优选域名<span class="optimize-card-badge optimize-card-badge-orange">稳定</span></span>
+					<span class="optimize-card-desc">访问官方在线优选域名站点，直接使用现成的优选结果，无需自己操作</span>
+					<span class="optimize-card-tag tag-pro">✅ 优点：开箱即用，一劳永逸</span>
+					<span class="optimize-card-tag tag-con">⚠️ 缺点：更换网络运营商环境后需重新优选</span>
+				</button>
 				<button type="button" class="optimize-start-card optimize-card-local" onclick="chooseLocalOptimize()">
 					<span class="optimize-card-icon">💻</span>
-					<span class="optimize-card-title">本地优选</span>
+					<span class="optimize-card-title">本地优选IP</span>
 					<span class="optimize-card-desc">下载客户端在本地设备上运行，灵活多变，功能性更多</span>
 					<span class="optimize-card-tag tag-pro">✅ 优点：灵活多变，功能丰富</span>
 					<span class="optimize-card-tag tag-con">⚠️ 缺点：需下载客户端，在本地设备上运行</span>
@@ -12940,6 +12963,75 @@
 					text-align: right;
 				}
 
+				/* ==================== 开屏加载动画 ==================== */
+				.boot-loading {
+					position: fixed;
+					inset: 0;
+					z-index: 90;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					padding: 18px;
+					background: var(--bg);
+					transition: opacity 0.5s ease 0.08s, visibility 0.5s ease 0.08s;
+				}
+
+				.boot-loading.is-hidden {
+					opacity: 0;
+					visibility: hidden;
+					pointer-events: none;
+				}
+
+				.boot-loading.is-hidden .boot-loading-card {
+					opacity: 0;
+					transform: translateY(-10px) scale(0.98);
+				}
+
+				.boot-loading-card {
+					display: grid;
+					justify-items: center;
+					gap: 14px;
+					padding: 30px 36px;
+					border: 1px solid var(--line);
+					border-radius: var(--radius);
+					background: var(--panel);
+					box-shadow: var(--shadow);
+					transition: opacity 0.4s ease, transform 0.4s ease;
+				}
+
+				.boot-loading-brand {
+					color: var(--text);
+					font-size: 24px;
+					font-weight: 800;
+					letter-spacing: 0.5px;
+				}
+
+				.boot-loading-status {
+					color: var(--muted);
+					font-size: 13px;
+					font-weight: 650;
+				}
+
+				.boot-loading-track {
+					width: min(260px, 70vw);
+					height: 8px;
+					overflow: hidden;
+					border-radius: 999px;
+					background: var(--ink-soft);
+				}
+
+				.boot-loading-bar {
+					width: 0;
+					height: 100%;
+					border-radius: inherit;
+					background: linear-gradient(90deg, var(--blue), var(--green));
+					transition: width 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+				}
+
+				.boot-loading-bar.is-crawling {
+					transition-duration: 5s;
+				}
+
 				.network-warning-overlay {
 					position: fixed;
 					inset: 0;
@@ -13480,6 +13572,16 @@
 		</head>
 
 		<body>
+			<div class="boot-loading" id="bootLoading" role="status" aria-live="polite">
+				<div class="boot-loading-card">
+					<div class="boot-loading-brand">BestCF</div>
+					<div class="boot-loading-status" id="bootLoadingStatus">正在检测网络环境…</div>
+					<div class="boot-loading-track" aria-hidden="true">
+						<div class="boot-loading-bar" id="bootLoadingBar"></div>
+					</div>
+				</div>
+			</div>
+
 			<main class="shell">
 				<header class="topbar">
 					<div class="brand">
@@ -13913,6 +14015,7 @@
 				document.addEventListener("DOMContentLoaded", () => {
 					bindEvents();
 					updateEditorMeta();
+					scheduleBootLoadingProgress();
 					detectNetwork();
 					if ("ResizeObserver" in window) {
 						state.editorResizeObserver = new ResizeObserver(updateEditorMeta);
@@ -14069,6 +14172,54 @@
 					return '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="16.5" cy="5.5" r="1.5"></circle><path d="M10 8.5 13 9l1.5 2.5 3 1"></path><path d="M7 20l2.2-4.7 2.6-1.1 1.4 2.3 3 1"></path><path d="M6 11l3-2.2 2.8.8 2 2"></path><path d="M5 19h3.5"></path></svg>';
 				}
 
+				// ==================== 开屏加载动画 ====================
+
+				const BOOT_LOADING_MIN_VISIBLE = 800;
+				const bootLoading = {
+					active: true,
+					startedAt: performance.now(),
+					timers: []
+				};
+
+				function scheduleBootLoadingProgress() {
+					const bar = document.getElementById("bootLoadingBar");
+					if (!bar) return;
+					[
+						{ delay: 60, width: "30%" },
+						{ delay: 700, width: "60%" },
+						{ delay: 1600, width: "80%" },
+						{ delay: 2600, width: "90%" },
+						{ delay: 3000, width: "98%", crawl: true }
+					].forEach(({ delay, width, crawl }) => {
+						bootLoading.timers.push(window.setTimeout(() => {
+							if (crawl) bar.classList.add("is-crawling");
+							bar.style.width = width;
+						}, delay));
+					});
+				}
+
+				function finishBootLoading() {
+					// 冲刺 100%（先退出慢速蠕动）→ 分层淡出（卡片先行、背景随后）→ resolve 后由调用方弹警告/放行
+					const overlay = document.getElementById("bootLoading");
+					const bar = document.getElementById("bootLoadingBar");
+					bootLoading.timers.forEach((timer) => window.clearTimeout(timer));
+					bootLoading.timers = [];
+					const wait = Math.max(0, BOOT_LOADING_MIN_VISIBLE - (performance.now() - bootLoading.startedAt));
+					return new Promise((resolve) => {
+						window.setTimeout(() => {
+							if (bar) {
+								bar.classList.remove("is-crawling");
+								bar.style.width = "100%";
+							}
+							window.setTimeout(() => {
+								if (overlay) overlay.classList.add("is-hidden");
+								bootLoading.active = false;
+								window.setTimeout(resolve, 580);
+							}, 320);
+						}, wait);
+					});
+				}
+
 				async function detectNetwork() {
 					return refreshCnNetwork({ resetResults: true, stopRuns: true });
 				}
@@ -14146,8 +14297,14 @@
 						updateServiceStatus();
 
 						const allowed = availableFamilies().length > 0;
+						if (bootLoading.active) {
+							await finishBootLoading();
+						}
 						if (!allowed) showNetworkWarning();
 						return allowed;
+					} catch (error) {
+						if (bootLoading.active) await finishBootLoading();
+						throw error;
 					} finally {
 						state.networkChecking = false;
 						updateActionAvailability();
@@ -16311,7 +16468,7 @@
 				</div>
 
 				<div class="api-form-row-item">
-					<label for="chainProxyHost">优选:</label>
+					<label for="chainProxyHost">优选域名/IP:</label>
 					<div class="chain-proxy-preferred-wrapper">
 						<input type="text" id="chainProxyHost" title="优选域名/IP" placeholder="当前网页域名">
 						<span class="proxy-protocol-separator">:</span>
@@ -17431,7 +17588,7 @@ proxyip1.cmliussss.net#HK,proxyip2.cmliussss.net#JP,proxyip3.cmliussss.net#US</p
 					style="margin: 0 0 16px 0; padding: 12px; background-color: transparent; border-radius: 0; text-align: left; font-size: 13px; max-height: 120px; overflow-y: auto; word-break: break-all; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start;">
 				</div>
 				<p style="margin: 0 0 16px 0; font-size: 13px; line-height: 1.6; text-align: left;">
-					<strong>如何修改？</strong>请在高手模式下的"⚙️ 详细配置信息"，在"HOST"里添加您的域名"<strong id="hostToAdd"
+					<strong>如何修改？</strong>请在"⚙️ 详细配置信息"（小白模式 / 高手模式均可查看），在"HOST"里添加您的域名"<strong id="hostToAdd"
 						style="color: #2196F3;"></strong>"，保存配置后即可生效。
 				</p>
 			</div>
@@ -25292,6 +25449,12 @@ proxyip1.cmliussss.net#HK,proxyip2.cmliussss.net#JP,proxyip3.cmliussss.net#US</p
 			openLocalOptimizeModal();
 		}
 
+		// 选择"在线优选域名"：先关闭选择弹窗，再新标签页打开官方在线优选域名站点
+		function chooseOnlineDomainOptimize() {
+			closeOptimizeStartModal();
+			window.open('https://bestcf.fxxk.dedyn.io/', '_blank', 'noopener');
+		}
+
 		// ==================== 本地优选 - CF 优选工具目录 ====================
 
 		// 打开本地优选工具目录弹窗（请求RAW拉取工具清单）
@@ -26409,6 +26572,37 @@ proxyip1.cmliussss.net#HK,proxyip2.cmliussss.net#JP,proxyip3.cmliussss.net#US</p
 				};
 			}
 
+			if (sourceConfig.type === 'trace') {
+				const controller = new AbortController();
+				return {
+					cancel: () => controller.abort(),
+					promise: (async () => {
+						const url = `${sourceConfig.url}${sourceConfig.url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+						const response = await fetchWithTimeout(url, {
+							cache: 'no-store',
+							signal: controller.signal
+						});
+
+						if (!response.ok) {
+							throw new Error(`${sourceConfig.url} HTTP ${response.status}`);
+						}
+
+						const text = await response.text();
+						const ipMatch = text.match(/^ip=(.+)$/m);
+						const requestIp = ipMatch ? ipMatch[1].trim() : '';
+						if (!requestIp) {
+							throw new Error(`${sourceConfig.url} missing ip field`);
+						}
+
+						return {
+							source: sourceConfig.url,
+							requestIp,
+							providerName: sourceConfig.name
+						};
+					})()
+				};
+			}
+
 			const controller = new AbortController();
 			return {
 				cancel: () => controller.abort(),
@@ -26459,6 +26653,7 @@ proxyip1.cmliussss.net#HK,proxyip2.cmliussss.net#JP,proxyip3.cmliussss.net#US</p
 			const statusElement = document.querySelector('#status-ipip');
 			const titleElement = statusElement ? statusElement.parentElement : null;
 			const testSources = [
+				/*
 				{
 					type: 'head',
 					name: '字节跳动',
@@ -26497,9 +26692,30 @@ proxyip1.cmliussss.net#HK,proxyip2.cmliussss.net#JP,proxyip3.cmliussss.net#US</p
 					url: `https://${Date.now()}.dns-detect.alicdn.com/api/detect/DescribeDNSLookup`,
 					callbackParam: 'cb',
 					extractIp: payload => payload?.content?.localIp
+				},
+				*/
+				{
+					type: 'trace',
+					name: '科赋锐科技₁',
+					url: 'https://api.cloudflare-cn.com/cdn-cgi/trace'
+				},
+				{
+					type: 'trace',
+					name: '科赋锐科技₂',
+					url: 'https://www.cf-ns.com/cdn-cgi/trace'
+				},
+				{
+					type: 'trace',
+					name: '科赋锐科技₃',
+					url: 'https://www.cf-ns.net/cdn-cgi/trace'
+				},
+				{
+					type: 'trace',
+					name: '科赋锐科技₄',
+					url: 'https://www.cf-ns.tech/cdn-cgi/trace'
 				}
 			];
-			const headSources = testSources.filter(sourceConfig => sourceConfig.type === 'head');
+			const headSources = testSources.filter(sourceConfig => sourceConfig.type === 'head' || sourceConfig.type === 'trace');
 			const jsonpSources = testSources.filter(sourceConfig => sourceConfig.type === 'jsonp');
 			let fastestSuccess;
 			try {
@@ -26507,6 +26723,9 @@ proxyip1.cmliussss.net#HK,proxyip2.cmliussss.net#JP,proxyip3.cmliussss.net#US</p
 					fastestSuccess = await raceIpProbeSources(headSources, '国内测试 HEAD');
 				} catch (headError) {
 					console.warn('[国内测试] HEAD 测试源不可用，后台切换到 JSONP 兜底:', headError);
+					if (!jsonpSources.length) {
+						throw headError;
+					}
 					fastestSuccess = await raceIpProbeSources(jsonpSources, '国内测试 JSONP');
 				}
 			} catch (error) {
